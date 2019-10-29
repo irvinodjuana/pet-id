@@ -1,2 +1,2 @@
-# pet-id
+# Pet ID
 Dog breed classification model and web application

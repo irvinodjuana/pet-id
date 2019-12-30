@@ -38,14 +38,15 @@ class XceptionModel:
 
     def __init__(self):
         """Initialize Xception model class"""
+        self.model = None
         self.num_breeds = 133
         self.dog_breeds = None
         self.imgs_dir = None
 
-        self.model = self.build_model()
 
     def learn(self, imgs_dir, bottleneck_file=None, checkpoint_dir=None):
         """Learn/train model from images dataset"""
+        self.model = self.build_model()
         self.imgs_dir = imgs_dir
 
         # Load and format images from dataset for model use
@@ -89,6 +90,8 @@ class XceptionModel:
         Load weights from pretrained model (.hdf5) into current model
         Creates list of dog breeds from .txt file
         """
+        self.model = self.build_model()
+
         # Load weights from .hdf5 file
         self.model.load_weights(weights_path)
         self.dog_breeds = []
@@ -99,6 +102,9 @@ class XceptionModel:
 
     def predict(self, img_path, num_values=5):
         """Predict breed(s) and probabilities based on image file"""
+        if not self.model:
+            return None     # Model not yet initialized
+
         tensor = Util.path_to_tensor(img_path)
         feature = Xception(weights='imagenet',
                            include_top=False).predict(preprocess_input(tensor))
@@ -109,6 +115,7 @@ class XceptionModel:
         top_predict_values = sorted(range(len(class_prob)),
                                     key=lambda i: class_prob[i])[-num_values:]
         top_predict_values = top_predict_values[::-1]
+        print(top_predict_values)
         predictions = [(self.dog_breeds[i], class_prob[i])
                        for i in top_predict_values]
 

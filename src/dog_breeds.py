@@ -1,11 +1,7 @@
 from keras.utils import np_utils
 from keras.preprocessing import image
 
-from keras.applications.resnet50 import ResNet50
-from keras.applications.vgg19 import VGG19
-from keras.applications.vgg19 import preprocess_input as preprocess_input_vgg19
-from keras.applications.resnet50 import ResNet50
-from keras.applications.resnet50 import preprocess_input as preprocess_input_resnet50
+from keras.applications.xception import Xception, preprocess_input
 
 from keras.layers.pooling import GlobalAveragePooling2D
 from keras.layers.merge import Concatenate
@@ -13,7 +9,7 @@ from keras.layers import Input, Dense
 from keras.layers.core import Dropout, Activation
 from keras.callbacks import ModelCheckpoint
 from keras.layers.normalization import BatchNormalization
-from keras.models import Model
+from keras.models import Model, Sequential
 
 from PIL import ImageFile
 ImageFile.LOAD_TRUNCATED_IMAGES = True  # allow truncated imgs
@@ -58,34 +54,21 @@ def paths_to_tensors(img_paths):
     return np.vstack(tensors_list)
 
 
-# Build pre-trained vgg19 model
-def extract_VGG19(file_paths):
+# Manually extract pre-trained Xception bottleneck features
+def extract_Xception(file_paths):
     tensors = paths_to_tensors(file_paths).astype('float32')
-    preprocessed_input = preprocess_input_vgg19(tensors)
-    return VGG19(weights='imagenet', include_top=False).predict(preprocessed_input, batch_size=32)
-
-
-# Build pre-trained resnet50 model
-def extract_ResNet50(file_paths):
-    tensors = paths_to_tensors(file_paths).astype('float32')
-    preprocessed_input = preprocess_input_resnet50(tensors)
-    return ResNet50(weights='imagenet', include_top=False).predict(preprocessed_input, batch_size=32)
-
-
-# Extract bottleneck features from vgg19 and resnet 50
-def extract_features(img_path):
-    tensor = path_to_tensor(img_path)
-    bottleneck_vgg19 = VGG19(weights='imagenet', 
-        include_top=False).predict(preprocess_input_vgg19(tensor))
-    bottleneck_resnet50 = ResNet50(weights='imagenet', 
-        include_top=False).predict(preprocess_input_resnet50(tensor))
-    return [bottleneck_vgg19, bottleneck_resnet50]
+    preprocessed_input = preprocess_input(tensors)
+    return Xception(weights='imagenet', include_top=False).predict(preprocessed_input, batch_size=32)
 
 
 # Predict with model, labels, img
 def predict(dog_breeds, model, img_path):
-    predicted_vector = model.predict(extract_features(img_path))
-    return dog_breeds[np.argmax(predicted_vector)]
+    tensor = path_to_tensor(img_path)
+    feature = Xception(weights='imagenet', 
+        include_top=False).predict(preprocess_input(tensor))
+    predicted_vector = model.predict(feature)
+    prediction = dog_breeds[np.argmax(predicted_vector)].lower()
+    return prediction
 
 
 # Build second-level model
@@ -100,16 +83,28 @@ def input_branch(input_shape=None):
 
     return branch, branch_input
 
+# Get bottleneck features from pre-computed file
+def other_bottleneck_features(path):
+    bottleneck_features = np.load(path)
+    train = bottleneck_features['train'] 
+    valid = bottleneck_features['valid']
+    test = bottleneck_features['test']
+    return train,valid,test
 
-# Display image
-def display_img(img_path):
-    plt.imshow(mpimg.imread(img_path))
+
+# a function that returns the prediction accuracy on test data
+def evaluate_model (model, model_name,tensors,targets):
+    predicted = [np.argmax(model.predict(np.expand_dims(feature, axis=0))) for feature in tensors]
+    test_accuracy = 100*np.sum(np.array(predicted)==np.argmax(targets, axis=1))/len(predicted)
+    
+    print (f'{model_name} accuracy on test data is {test_accuracy}%')
 
 
 # Main
 def main():
     # Setup parameters
     images_dir = "../data/assets/images/"
+    checkpoint_dir = "../data/saved_models/"
 
     # Process data into files/labels
     train_files, train_targets = load_dataset(images_dir + "train")
@@ -121,57 +116,36 @@ def main():
     
     # dog_breeds = [item[20:-1] for item in sorted(glob("dog/assets/images/train/*/"))]
 
-    # train_vgg19 = extract_VGG19(train_files)
-    # valid_vgg19 = extract_VGG19(valid_files)
-    # test_vgg19 = extract_VGG19(test_files)
-    # print("Extracted vgg19")
-    # print("VGG19 shape", train_vgg19.shape[1:])
+    # Obtain bottleneck features for training, validation, testing datasets
+    # bottleneck_file = "../data/assets/bottleneck_features/DogXceptionData.npz"
+    # train_Xception, valid_Xception, test_Xception = other_bottleneck_features(bottleneck_file)
+    # train_Xception = extract_Xception(train_files)
+    # valid_Xception = extract_Xception(valid_files)
+    # test_Xception = extract_Xception(test_files)
+    
+    # Build Xception model
+    Xception_model = Sequential()
+    Xception_model.add(GlobalAveragePooling2D(input_shape=(7, 7, 2048)))
+    Xception_model.add(Dense(133, activation='softmax'))
+    # Xception_model.summary()
 
-    # train_resnet50 = extract_ResNet50(train_files)
-    # valid_resnet50 = extract_ResNet50(valid_files)
-    # test_resnet50 = extract_ResNet50(test_files)
-    # print("Extracted resnet50")
-    # print("Resnet50 shape", train_resnet50.shape[1:])
+    # Compile and train model
+    # Xception_model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
+    checkpoint_path = checkpoint_dir + "best_xception_model.hdf5"
+    # checkpointer = ModelCheckpoint(filepath=checkpoint_path, verbose=1 , save_best_only=True)
 
-    vgg19_branch, vgg19_input = input_branch(input_shape=(7, 7, 512))
-    resnet50_branch, resnet50_input = input_branch(input_shape=(7, 7, 2048))
+    # Xception_history = Xception_model.fit(train_Xception, train_targets,
+    #               validation_data = (valid_Xception , valid_targets),
+    #               epochs=25, batch_size=20, callbacks=[checkpointer], verbose=1)
 
-    concat_branches = Concatenate()([vgg19_branch, resnet50_branch])
-    net = Dropout(0.3)(concat_branches)
-    net = Dense(640, use_bias=False, kernel_initializer='uniform')(net)
-    net = BatchNormalization()(net)
-    net = Activation('relu')(net)
-    net = Dropout(0.3)(net)
-    net = Dense(133, kernel_initializer='uniform', activation='softmax')(net)
+    # Load model weights
+    Xception_model.load_weights(checkpoint_path)
 
-    model = Model(inputs=[vgg19_input, resnet50_input], outputs=[net])
-    # model.summary()
+    # Evaluate model against testing dataset
+    # evaluate_model(Xception_model, "Xception" , test_Xception, test_targets)
 
-    # Compile and fit model
-    checkpoint_path = "../data/saved_models/bestmodel.hdf5"
-    NUM_EPOCHS = 10
-    BATCH_SIZE = 4
-
-    # model.compile(loss='categorical_crossentropy', optimizer='rmsprop',
-    #               metrics=['accuracy'])
-    # checkpointer = ModelCheckpoint(filepath=checkpoint_path, verbose=1,
-    #                                save_best_only=True)
-    # model.fit([train_vgg19, train_resnet50], train_targets, 
-    #           validation_data=([valid_vgg19, valid_resnet50], valid_targets),
-    #           epochs=NUM_EPOCHS, batch_size=BATCH_SIZE, callbacks=[checkpointer],
-    #           verbose=1)
-
-    model.load_weights(checkpoint_path)
-
-    # from sklearn.metrics import accuracy_score
-
-    # predictions = model.predict([test_vgg19, test_resnet50])
-    # breed_predictions = [np.argmax(prediction) for prediction in predictions]
-    # breed_true_labels = [np.argmax(true_label) for true_label in test_targets]
-    # print('Test accuracy: %.4f%%' % (accuracy_score(breed_true_labels, breed_predictions) * 100))
-
-    img_path = "../data/assets/images/test/054.Collie/Collie_03794.jpg"
-    print(predict(dog_breeds, model, img_path))
+    img_path = "../data/assets/images/test/113.Old_english_sheepdog/Old_english_sheepdog_07376.jpg"
+    print(predict(dog_breeds, Xception_model, img_path))
     plt.imshow(mpimg.imread(img_path))
 
 

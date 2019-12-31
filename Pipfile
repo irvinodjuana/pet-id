@@ -1,0 +1,23 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+requests = "*"
+toml = "*"
+keras = "*"
+flask = "*"
+flask_cors = "*"
+tensorflow = "*"
+sklearn = "*"
+tqdm = "*"
+matplotlib = "*"
+pillow = "*"
+
+[dev-packages]
+pycodestyle = "*"
+pytest = "*"
+
+[requires]
+python_version = "3.6"

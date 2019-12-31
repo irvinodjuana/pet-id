@@ -21,13 +21,9 @@ import matplotlib.image as mpimg
 
 from xception_util import Util
 
-from PIL import ImageFile
-
 # SSL setup to import pretrained models from keras.applications
 import ssl
 ssl._create_default_https_context = ssl._create_unverified_context
-
-ImageFile.LOAD_TRUNCATED_IMAGES = True  # allow truncated imgs
 
 
 class XceptionModel:

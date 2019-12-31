@@ -39,7 +39,6 @@ class XceptionModel:
         self.dog_breeds = None
         self.imgs_dir = None
 
-
     def learn(self, imgs_dir, bottleneck_file=None, checkpoint_dir=None):
         """Learn/train model from images dataset"""
         self.model = self.build_model()
@@ -118,7 +117,7 @@ class XceptionModel:
                        for i in top_predict_values]
 
         return predictions
-    
+
     def detect_dog(self, img_path):
         """Detect whether or not image contains dog"""
         # img needs to be resized to 299, base xception input shape
@@ -126,7 +125,6 @@ class XceptionModel:
         base_model = Xception(weights='imagenet')
         prediction = np.argmax(base_model.predict(img))
         return bool(prediction >= 151 and prediction <= 268)
-
 
     def build_model(self):
         """Build the model"""

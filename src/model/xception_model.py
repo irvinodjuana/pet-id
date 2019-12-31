@@ -10,7 +10,7 @@ from keras.callbacks import ModelCheckpoint
 import numpy as np
 from glob import glob
 
-from xception_util import Util
+from model.xception_util import Util
 
 # SSL setup to import pretrained models from keras.applications
 import ssl
@@ -123,3 +123,6 @@ class XceptionModel:
         model.add(GlobalAveragePooling2D(input_shape=(7, 7, 2048)))
         model.add(Dense(self.num_breeds, activation='softmax'))
         return model
+    
+    def status(self):
+        return "working!"

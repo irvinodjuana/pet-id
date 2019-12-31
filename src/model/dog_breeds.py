@@ -23,13 +23,15 @@ def main():
 
     img_path1 = "/Users/irvinodjuana/Desktop/rosie.png"
     img_path2 = "/Users/irvinodjuana/Downloads/cat2.jpeg"
+    img_path3 = "/Users/irvinodjuana/Downloads/linkedin_pic.png"
 
     # Test breed predictions
-    predictions = xception_model.predict(img_path1)
+    predictions = xception_model.predict(img_path3)
     print(predictions)
     # Test dog detection
     print("Rosie is a dog: ", xception_model.detect_dog(img_path1))     # True
     print("Cat is a dog: ", xception_model.detect_dog(img_path2))       # False
+    print("Irvino is a dog: ", xception_model.detect_dog(img_path3))    # False
 
     # count = 0
     # dogs = 0

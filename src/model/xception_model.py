@@ -1,5 +1,4 @@
 from keras.preprocessing import image
-
 from keras.applications.xception import Xception, preprocess_input
 
 from keras.layers.pooling import GlobalAveragePooling2D
@@ -104,8 +103,8 @@ class XceptionModel:
         top_predict_values = sorted(range(len(class_prob)),
                                     key=lambda i: class_prob[i])[-num_values:]
         top_predict_values = top_predict_values[::-1]
-        predictions = [(self.dog_breeds[i], class_prob[i])
-                       for i in top_predict_values]
+        predictions = {self.dog_breeds[i]: float(class_prob[i]) 
+                       for i in top_predict_values}
 
         return predictions
 
@@ -123,6 +122,7 @@ class XceptionModel:
         model.add(GlobalAveragePooling2D(input_shape=(7, 7, 2048)))
         model.add(Dense(self.num_breeds, activation='softmax'))
         return model
-    
+
     def status(self):
-        return "working!"
+        return "running"
+

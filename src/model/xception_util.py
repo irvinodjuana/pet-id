@@ -4,7 +4,6 @@ from keras.applications.xception import Xception, preprocess_input
 
 from sklearn.datasets import load_files
 import numpy as np
-from glob import glob
 from tqdm import tqdm
 
 from PIL import ImageFile

@@ -15,10 +15,12 @@ def main():
 
     xception_model = XceptionModel()
 
-    # xception_model.learn(images_dir,
-    #                      bottleneck_file=bottleneck_features_path,
-    #                      checkpoint_dir=checkpoint_dir)
+    # Train model
+    xception_model.learn(images_dir,
+                         bottleneck_file=None,
+                         checkpoint_dir=checkpoint_dir)
     
+    # Load Pretrained weights
     xception_model.load_pretrained_model(weights_path, breeds_path)
 
     img_path1 = "/Users/irvinodjuana/Desktop/rosie.png"

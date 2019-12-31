@@ -1,23 +1,14 @@
-from keras.utils import np_utils
 from keras.preprocessing import image
 
 from keras.applications.xception import Xception, preprocess_input
 
 from keras.layers.pooling import GlobalAveragePooling2D
-from keras.layers.merge import Concatenate
-from keras.layers import Input, Dense
-from keras.layers.core import Dropout, Activation
+from keras.layers import Dense
+from keras.models import Sequential
 from keras.callbacks import ModelCheckpoint
-from keras.layers.normalization import BatchNormalization
-from keras.models import Model, Sequential
 
-from sklearn.datasets import load_files
 import numpy as np
 from glob import glob
-from tqdm import tqdm
-
-import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
 
 from xception_util import Util
 

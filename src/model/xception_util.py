@@ -25,9 +25,8 @@ class Util:
         return input_files, targets
 
     @staticmethod
-    def path_to_tensor(img_path):
+    def path_to_tensor(img_path, img_resize = 224):
         """Resize colour img and and convert to 4D tensor"""
-        img_resize = 224
         # RGB image -> PIL.Image.Image
         img = image.load_img(img_path, target_size=(img_resize, img_resize))
         x = image.img_to_array(img)     # PIL.Image.Image -> 3D Tensor

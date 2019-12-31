@@ -101,7 +101,10 @@ class XceptionModel:
                 self.dog_breeds.append(breed.strip())
 
     def predict(self, img_path, num_values=5):
-        """Predict breed(s) and probabilities based on image file"""
+        """
+        Predict breed(s) and probabilities based on image file
+        Returns list of tuples: [(breed, probability), ...]
+        """
         if not self.model:
             return None     # Model not yet initialized
 
@@ -115,11 +118,19 @@ class XceptionModel:
         top_predict_values = sorted(range(len(class_prob)),
                                     key=lambda i: class_prob[i])[-num_values:]
         top_predict_values = top_predict_values[::-1]
-        print(top_predict_values)
         predictions = [(self.dog_breeds[i], class_prob[i])
                        for i in top_predict_values]
 
         return predictions
+    
+    def detect_dog(self, img_path):
+        """Detect whether or not image contains dog"""
+        # img needs to be resized to 299, base xception input shape
+        img = preprocess_input(Util.path_to_tensor(img_path, img_resize=299))
+        base_model = Xception(weights='imagenet')
+        prediction = np.argmax(base_model.predict(img))
+        return bool(prediction >= 151 and prediction <= 268)
+
 
     def build_model(self):
         """Build the model"""

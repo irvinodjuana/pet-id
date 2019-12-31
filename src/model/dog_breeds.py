@@ -1,4 +1,5 @@
 from xception_model import XceptionModel
+from glob import glob
 
 
 # Main
@@ -20,9 +21,23 @@ def main():
     #                      checkpoint_dir=checkpoint_dir)
 
     img_path1 = "/Users/irvinodjuana/Desktop/rosie.png"
-    img_path2 = "/Users/irvinodjuana/Downloads/dog.jpeg"
+    img_path2 = "/Users/irvinodjuana/Downloads/cat2.jpeg"
     predictions = xception_model.predict(img_path1)
     print(predictions)
+
+    print("Rosie is a dog: ", xception_model.detect_dog(img_path1))
+    print("Cat is a dog: ", xception_model.detect_dog(img_path2))
+
+    count = 0
+    dogs = 0
+
+
+    for file in glob(images_dir + "test/**/*.jpg")[:20]:
+        count += 1
+        if xception_model.detect_dog(file):
+            dogs += 1
+    
+    print(f"Percentage of dogs detected in train: {dogs}/{count}")
 
 
 if __name__ == "__main__":

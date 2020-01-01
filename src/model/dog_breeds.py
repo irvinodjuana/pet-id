@@ -1,6 +1,8 @@
 from xception_model import XceptionModel
 from glob import glob
 
+import sys
+sys.path.append('../')
 
 # Main
 def main():
@@ -16,9 +18,9 @@ def main():
     xception_model = XceptionModel()
 
     # Train model
-    xception_model.learn(images_dir,
-                         bottleneck_file=None,
-                         checkpoint_dir=checkpoint_dir)
+    # xception_model.learn(images_dir,
+    #                      bottleneck_file=None,
+    #                      checkpoint_dir=checkpoint_dir)
     
     # Load Pretrained weights
     xception_model.load_pretrained_model(weights_path, breeds_path)
@@ -28,7 +30,7 @@ def main():
     img_path3 = "/Users/irvinodjuana/Downloads/linkedin_pic.png"
 
     # Test breed predictions
-    predictions = xception_model.predict(img_path3)
+    predictions = xception_model.predict_file(img_path1)
     print(predictions)
     # Test dog detection
     print("Rosie is a dog: ", xception_model.detect_dog(img_path1))     # True

@@ -1,5 +1,4 @@
 from keras.preprocessing import image
-
 from keras.applications.xception import Xception, preprocess_input
 
 from keras.layers.pooling import GlobalAveragePooling2D
@@ -10,7 +9,7 @@ from keras.callbacks import ModelCheckpoint
 import numpy as np
 from glob import glob
 
-from xception_util import Util
+from model.xception_util import Util
 
 # SSL setup to import pretrained models from keras.applications
 import ssl
@@ -86,15 +85,31 @@ class XceptionModel:
             for breed in file:
                 self.dog_breeds.append(breed.strip())
 
-    def predict(self, img_path, num_values=5):
+    def predict_file(self, img_path, num_values=5):
         """
-        Predict breed(s) and probabilities based on image file
-        Returns list of tuples: [(breed, probability), ...]
+        Predict breed(s) and probabilities based on image file(path)
         """
         if not self.model:
             return None     # Model not yet initialized
-
+        # Predict on tensor
         tensor = Util.path_to_tensor(img_path)
+        return self.predict_tensor(tensor, num_values)
+    
+    def predict_img(self, img, num_values=5):
+        """
+        Predict breed(s) and probabilities based on image object
+        """
+        if not self.model:
+            return None     # Model not yet initialized
+        # Predict on tensor
+        tensor = Util.img_to_tensor(img)
+        return self.predict_tensor(tensor, num_values)
+
+    def predict_tensor(self, tensor, num_values=5):
+        """Predict dog breeds from tensor"""
+        if not self.model:
+            return None     # Model not yet initialized
+
         feature = Xception(weights='imagenet',
                            include_top=False).predict(preprocess_input(tensor))
 
@@ -104,15 +119,26 @@ class XceptionModel:
         top_predict_values = sorted(range(len(class_prob)),
                                     key=lambda i: class_prob[i])[-num_values:]
         top_predict_values = top_predict_values[::-1]
-        predictions = [(self.dog_breeds[i], class_prob[i])
-                       for i in top_predict_values]
+        predictions = []
+
+        for value in top_predict_values:
+            predictions.append({'label': self.dog_breeds[value],
+                                'probability': float(class_prob[value])})
 
         return predictions
 
-    def detect_dog(self, img_path):
-        """Detect whether or not image contains dog"""
+    def detect_dog_file(self, img_path):
+        """Detect whether or not image file contains dog"""
         # img needs to be resized to 299, base xception input shape
         img = preprocess_input(Util.path_to_tensor(img_path, img_resize=299))
+        base_model = Xception(weights='imagenet')
+        prediction = np.argmax(base_model.predict(img))
+        return bool(prediction >= 151 and prediction <= 268)
+
+    def detect_dog_img(self, img):
+        """Detect whether or not image contains dog"""
+        # img needs to be resized to 299, base xception input shape
+        img = preprocess_input(Util.img_to_tensor(img, img_resize=299))
         base_model = Xception(weights='imagenet')
         prediction = np.argmax(base_model.predict(img))
         return bool(prediction >= 151 and prediction <= 268)
@@ -123,3 +149,7 @@ class XceptionModel:
         model.add(GlobalAveragePooling2D(input_shape=(7, 7, 2048)))
         model.add(Dense(self.num_breeds, activation='softmax'))
         return model
+
+    def status(self):
+        return "running"
+

@@ -30,7 +30,7 @@ def main():
     img_path3 = "/Users/irvinodjuana/Downloads/linkedin_pic.png"
 
     # Test breed predictions
-    predictions = xception_model.predict(img_path1)
+    predictions = xception_model.predict_file(img_path1)
     print(predictions)
     # Test dog detection
     print("Rosie is a dog: ", xception_model.detect_dog(img_path1))     # True

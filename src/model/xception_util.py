@@ -5,8 +5,9 @@ from keras.applications.xception import Xception, preprocess_input
 from sklearn.datasets import load_files
 import numpy as np
 from tqdm import tqdm
+import io
 
-from PIL import ImageFile
+from PIL import ImageFile, Image
 ImageFile.LOAD_TRUNCATED_IMAGES = True  # allow truncated imgs
 
 
@@ -25,12 +26,25 @@ class Util:
 
     @staticmethod
     def path_to_tensor(img_path, img_resize=224):
-        """Resize colour img and and convert to 4D tensor"""
+        """Resize colour img from path and convert to 4D tensor"""
         # RGB image -> PIL.Image.Image
         img = image.load_img(img_path, target_size=(img_resize, img_resize))
         x = image.img_to_array(img)     # PIL.Image.Image -> 3D Tensor
         x = np.expand_dims(x, axis=0)   # 3D -> 4D Tensor
         return x
+    
+    @staticmethod
+    def img_to_tensor(img, img_resize=224):
+        """Resize colour img and convert to 4D tensor"""
+        img = Image.open(io.BytesIO(img))
+        # Convert to RGB
+        if img.mode != "RGB":
+            img = img.convert("RGB")
+        img = img.resize((img_resize, img_resize))
+        x = image.img_to_array(img)     # PIL.Image.Image -> 3D Tensor
+        x = np.expand_dims(x, axis=0)   # 3D -> 4D Tensor
+        return x
+
 
     @staticmethod
     def paths_to_tensors(img_paths):

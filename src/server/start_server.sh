@@ -1,5 +1,7 @@
 #!/bin/bash
 
-export FLASK_APP=app.py
-export FLASK_ENV=development
-flask run --without-threads
+# export FLASK_APP=app.py
+# export FLASK_ENV=development
+# flask run --without-threads
+
+python3 app.py

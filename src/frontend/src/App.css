@@ -9,10 +9,10 @@ html, body {
 .content {
   margin: auto;
   margin-top: 20px;
-  width: 80%;
-  height: auto;
+  width: 90%;
+  height: 90%;
   background-color: #fff;
-  padding: 20px;
+  padding: 10px 30px;
   border-radius: 8px;
 }
 
@@ -41,4 +41,11 @@ label {
 
 #result {
   color: #000;
+}
+
+.alert {
+  height: 38px;
+  line-height:15px;
+  padding:10px 10px;
+  text-align: center;
 }

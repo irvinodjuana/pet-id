@@ -14,7 +14,7 @@ pipenv install --dev
 ```
 
 Pipenv will now manage a virtual environment for the project.
-To run the flask server, we can open a new shell in the virtual environment and run the python script:
+To run the flask server, open a new shell in the virtual environment and run the python script with these commands:
 
 ```bash
 pipenv shell

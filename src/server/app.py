@@ -41,9 +41,9 @@ def setup_model():
     """Setup backend machine learning model for prediction"""
     global model
 
-    data_dir = "../../data/"
-    weights_path = data_dir + "saved_models/best_xception_model.hdf5"
-    breeds_path = data_dir + "assets/dog_breeds.txt"
+    data_dir = "data/"
+    weights_path = data_dir + "best_xception_model.hdf5"
+    breeds_path = data_dir + "dog_breeds.txt"
 
     model = XceptionModel()
     model.load_pretrained_model(weights_path, breeds_path)

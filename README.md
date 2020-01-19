@@ -20,7 +20,6 @@ To run the flask server, open a new shell in the virtual environment and run the
 pipenv shell
 cd src/server/
 python app.py
-python app.py
 ```
 
 The server should now be running, and can be accessed through the frontend webpage or any REST client.

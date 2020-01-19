@@ -38,7 +38,7 @@ npm run build
 npm run start
 ```
 
-The React webpage should now be running in your browser on http://localhost:3000/!
-If you have setup the server as well, you can now upload pictures and test the prediction.
+The React webpage should now be running in your browser on http://localhost:3000/!  
+If the server is set up and running, you can upload pictures and test the predictions.
 
 

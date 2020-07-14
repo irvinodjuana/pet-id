@@ -123,7 +123,7 @@ class App extends Component {
     if (this.state.isLoading) {
       return ("loading...");
     } else if (this.state.predictions) {
-      return (<Graph predictions={this.state.predictions}/>);
+      return this.state.dogFound ? (<Graph predictions={this.state.predictions}/>) : (<div/>);
     } else {
       return null;
     }
